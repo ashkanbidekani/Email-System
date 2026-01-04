@@ -1,29 +1,43 @@
 from fastapi import FastAPI
-from pydantic import failed
+from pydantic import BaseModel, EmailStr
+from datetime import datetime,timedelta
 app = FastAPI()
 
 # -------------------------------
 mailbox = {}
 
+
+# -------------------------------
+class Email(BaseModel):
+
+    sender_email: EmailStr
+    receiver_email: EmailStr
+    subject: str
+    text: str
+    current_time: float
+
 # -------------------------------
 @app.post("/send-email")
-def send_email(sender_email: str,receiver_email: str,subject: str,text: str):
+def send_email(email: Email):
     email_data = {
-        "from": sender_email,
-        "subject": subject,
-        "text": text
+        "from": email.sender_email,
+        "subject": email.subject,
+        "text": email.text,
+        "current_time" : datetime.utcnow()
     }
+    current_time = datetime.utcnow()
 
-    if receiver_email not in mailbox:
-        mailbox[receiver_email] = []
+    if email.receiver_email not in mailbox:
+        mailbox[email.receiver_email] = []
 
-    mailbox[receiver_email].append(email_data)
+    mailbox[email.receiver_email].append(email_data)
 
     return {"status": "Email sent successfully"}
 
+
 # -------------------------------
 @app.get("/inbox")
-def get_inbox(email: str):
+def get_inbox(email: EmailStr):
     if email not in mailbox:
         return {"emails": []}
 
