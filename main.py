@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from pydantic import failed
 app = FastAPI()
 
 # -------------------------------
